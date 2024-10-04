@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCAlert</title>
+    <!-- Incluir la librería SheetJS para leer archivos Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Incluir el archivo JavaScript -->
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Input para subir el archivo -->
+    <input type="file" id="inputArchivo" accept=".xlsx">
+
+    <!-- Tabla para mostrar los datos -->
+    <table id="tablaDatos" border="1">
+        <thead>
+            <tr>
+                <th>Muestra</th>
+                <th>Observación 1</th>
+                <th>Observación 2</th>
+                <th>Observación 3</th>
+                <th>Observación 4</th>
+                <th>Observación 5</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se insertarán aquí dinámicamente -->
+        </tbody>
+    </table>
+
+</body>
+
+</html>
