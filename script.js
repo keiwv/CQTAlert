@@ -113,7 +113,8 @@ document
             currentSelectedID++;
         }
 
-        filaActual = tabla.insertRow(); // Insertar nueva fila al final
+        // Insertar nueva fila al final de la tabla de observaciones
+        filaActual = tabla.insertRow();
         filaActual.insertCell().textContent = numeroDeMuestra; // Columna MUESTRA
 
         // Insertar celdas para cada observación con inputs deshabilitados inicialmente
@@ -123,21 +124,30 @@ document
         }
 
         // Habilitar el primer input de observación
-        let str = "observacion" + currentSelectedID;
-        document.getElementById(str).disabled = false;
+        document.getElementById(
+            `observacion${currentSelectedID}`
+        ).disabled = false;
         console.log(currentSelectedID);
 
-        // Crear una nueva fila en la tabla de resultados para esta muestra
-        filaActualResultados = tablaResultados.insertRow();
-        filaActualResultados.insertCell().textContent = `Muestra ${numeroDeMuestra}`; // Muestra ID
-        filaActualResultados.insertCell().textContent = "-"; // Promedio inicial
-        filaActualResultados.insertCell().textContent = "-"; // Desviación estándar inicial
+        // Insertar una nueva fila en la tabla de resultados (promedio y desviación estándar)
+        const nuevaFilaResultados = tablaResultados.insertRow();
+        nuevaFilaResultados.insertCell().textContent = `Muestra ${numeroDeMuestra}`; // Nombre de la muestra
+        nuevaFilaResultados.insertCell().textContent = "0"; // Promedio inicial
+        nuevaFilaResultados.insertCell().textContent = "0"; // Desviación estándar inicial
     });
 
-// Evento para manejar el siguiente paso de observación
 document
     .getElementById("siguienteObservacion")
     .addEventListener("click", function () {
+        let value = document.getElementById(
+            `observacion${currentSelectedID}`
+        ).value;
+
+        if (isNaN(value)) {
+            alert("Elige un valor válido");
+            return;
+        }
+
         if (currentSelectedID == 0) {
             currentSelectedID++;
         }
@@ -159,6 +169,32 @@ document
             ).disabled = true;
             document.getElementById("siguienteObservacion").disabled = true;
             alert("Muestra guardada automáticamente.");
+
+            // Obtener los valores de las observaciones de la fila actual
+            const valoresObservaciones = [];
+            for (let i = 1; i <= 5; i++) {
+                const observacion = document.getElementById(
+                    `observacion${MaxRowCellID - (6 - i)}`
+                ).value;
+                if (!isNaN(observacion) && observacion !== "") {
+                    valoresObservaciones.push(parseFloat(observacion));
+                }
+            }
+
+            // Calcular el promedio y la desviación estándar
+            const promedio = calcularPromedio(valoresObservaciones);
+            const desviacionEstandar = calcularDesviacionEstandar(
+                valoresObservaciones,
+                promedio
+            );
+
+            // Actualizar la fila correspondiente en la tabla de resultados
+            const tablaResultados = document
+                .getElementById("tablaResultados")
+                .getElementsByTagName("tbody")[0];
+            const filaResultado = tablaResultados.rows[numeroDeMuestra - 1];
+            filaResultado.cells[1].textContent = promedio.toFixed(2);
+            filaResultado.cells[2].textContent = desviacionEstandar.toFixed(2);
 
             // Habilitar de nuevo el botón "Comenzar Muestreo"
             document.getElementById("comenzarMuestreo").disabled = false;
