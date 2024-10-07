@@ -30,6 +30,7 @@ document
             // Mostrar los datos en la tabla y actualizar número de muestra
             mostrarDatosEnTabla(jsonData);
             numeroDeMuestra = jsonData.length; // Actualizar la cantidad de muestras
+            wasLoadedDocument = true;
         };
 
         reader.readAsArrayBuffer(file);
@@ -78,8 +79,6 @@ function mostrarDatosEnTabla(data) {
                 nuevaFilaResultados.insertCell().textContent =
                     desviacionEstandar.toFixed(2);
             }
-
-            wasLoadedDocument = true;
         }
     });
 }
@@ -127,13 +126,14 @@ document
         document.getElementById(
             `observacion${currentSelectedID}`
         ).disabled = false;
-        console.log(currentSelectedID);
 
         // Insertar una nueva fila en la tabla de resultados (promedio y desviación estándar)
         const nuevaFilaResultados = tablaResultados.insertRow();
         nuevaFilaResultados.insertCell().textContent = `Muestra ${numeroDeMuestra}`; // Nombre de la muestra
         nuevaFilaResultados.insertCell().textContent = "0"; // Promedio inicial
         nuevaFilaResultados.insertCell().textContent = "0"; // Desviación estándar inicial
+
+        console.log(numeroDeMuestra);
     });
 
 document
@@ -192,7 +192,16 @@ document
             const tablaResultados = document
                 .getElementById("tablaResultados")
                 .getElementsByTagName("tbody")[0];
-            const filaResultado = tablaResultados.rows[numeroDeMuestra - 1];
+
+            let filaResultado = null;
+
+            if (wasLoadedDocument) {
+                filaResultado = tablaResultados.rows[numeroDeMuestra - 1];
+            } else {
+                console.log(numeroDeMuestra);
+                filaResultado = tablaResultados.rows[numeroDeMuestra];
+            }
+
             filaResultado.cells[1].textContent = promedio.toFixed(2);
             filaResultado.cells[2].textContent = desviacionEstandar.toFixed(2);
 
