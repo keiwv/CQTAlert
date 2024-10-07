@@ -8,6 +8,8 @@
     <!-- Incluir la librería SheetJS para leer archivos Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Incluir el archivo JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="script.js" defer></script>
 </head>
 
@@ -18,7 +20,10 @@
     <button id="comenzarMuestreo">Comenzar muestreo</button>
     <button id="siguienteObservacion" disabled>Siguiente observación</button>
     <button id="anteriorObservacion" disabled>Anterior observación</button>
-
+    <input type="text" id="inputUCL">
+    <input type="text" id="inputUC">
+    <input type="text" id="inputLCL">
+    
 
 
     <!-- Tabla para mostrar los datos -->
@@ -51,6 +56,9 @@
             <!-- Los resultados se insertarán aquí dinámicamente -->
         </tbody>
     </table>
+
+    <canvas id="graficoDesviacionEstandar" width="400" height="200"></canvas>
+
 </body>
 
 </html>

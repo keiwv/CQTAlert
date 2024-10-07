@@ -44,11 +44,11 @@ function mostrarDatosEnTabla(data) {
         .getElementById("tablaResultados")
         .getElementsByTagName("tbody")[0];
 
-    // Limpiar cualquier dato anterior en ambas tablas
     tabla.innerHTML = "";
     tablaResultados.innerHTML = "";
+    muestras = []; // Reset the sample names
+    desviacionesEstandar = []; // Reset the standard deviation values
 
-    // Recorrer las filas y agregarlas a la tabla
     data.forEach((fila, index) => {
         if (fila.length > 0) {
             const nuevaFila = tabla.insertRow();
@@ -56,7 +56,6 @@ function mostrarDatosEnTabla(data) {
 
             fila.forEach((celda, i) => {
                 if (!isNaN(celda) && i < 6) {
-                    // Llenar las observaciones
                     const nuevaCelda = nuevaFila.insertCell();
                     nuevaCelda.textContent = celda;
                     valoresNumericos.push(parseFloat(celda));
@@ -64,14 +63,16 @@ function mostrarDatosEnTabla(data) {
             });
 
             if (valoresNumericos.length > 0) {
-                // Calcular el promedio y la desviación estándar
                 const promedio = calcularPromedio(valoresNumericos);
                 const desviacionEstandar = calcularDesviacionEstandar(
                     valoresNumericos,
                     promedio
                 );
 
-                // Agregar los resultados a la tabla de resultados
+                // Add the sample name and standard deviation to the arrays
+                muestras.push(`Muestra ${index}`);
+                desviacionesEstandar.push(desviacionEstandar.toFixed(2));
+
                 const nuevaFilaResultados = tablaResultados.insertRow();
                 nuevaFilaResultados.insertCell().textContent = `Muestra ${index}`;
                 nuevaFilaResultados.insertCell().textContent =
@@ -81,6 +82,9 @@ function mostrarDatosEnTabla(data) {
             }
         }
     });
+
+    // Update the chart with the new data
+    actualizarGrafico();
 }
 
 document
@@ -196,18 +200,22 @@ document
             let filaResultado = null;
 
             if (wasLoadedDocument) {
+                muestras.push(`Muestra ${numeroDeMuestra - 1}`);
                 filaResultado = tablaResultados.rows[numeroDeMuestra - 1];
             } else {
-                console.log(numeroDeMuestra);
+                muestras.push(`Muestra ${numeroDeMuestra}`);
                 filaResultado = tablaResultados.rows[numeroDeMuestra];
             }
 
+            desviacionesEstandar.push(desviacionEstandar);
             filaResultado.cells[1].textContent = promedio.toFixed(2);
             filaResultado.cells[2].textContent = desviacionEstandar.toFixed(2);
 
             // Habilitar de nuevo el botón "Comenzar Muestreo"
             document.getElementById("comenzarMuestreo").disabled = false;
             filaActual = null;
+
+            actualizarGrafico();
         }
 
         tempcurrentSelectedID = currentSelectedID;
@@ -264,4 +272,43 @@ function calcularDesviacionEstandar(valores, promedio) {
         0
     );
     return Math.sqrt(sumaDiferenciasCuadradas / valores.length);
+}
+
+let desviacionesEstandar = []; // Array to store standard deviation values
+let muestras = []; // Array to store the sample names
+let chart;
+
+// Function to update the chart with new data
+function actualizarGrafico() {
+    const ctx = document
+        .getElementById("graficoDesviacionEstandar")
+        .getContext("2d");
+        
+    if (chart) {
+        chart.destroy();
+    }
+
+    chart = new Chart(ctx, {
+        type: "line", // You can use 'bar' or 'line' depending on how you want the graph to look
+        data: {
+            labels: muestras, // Labels for each sample
+            datasets: [
+                {
+                    label: "Desviación Estándar",
+                    data: desviacionesEstandar, // Data points for standard deviation
+                    backgroundColor: "rgba(75, 192, 192, 0.2)", // Background color
+                    borderColor: "rgba(75, 192, 192, 1)", // Line color
+                    borderWidth: 1,
+                    fill: false,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+        },
+    });
 }
