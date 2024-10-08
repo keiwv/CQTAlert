@@ -68,6 +68,9 @@ document.getElementById("comenzarMuestreo").addEventListener("click", function (
     // Incrementar el número de muestra basado en el número de filas
     numeroDeMuestra = filasExistentes;
 
+    document.getElementById("siguienteObservacion").disabled = false;
+    document.getElementById("anteriorObservacion").disabled = false;
+
     if (!firstRow)
     {
         firstRow = true;
@@ -108,6 +111,7 @@ document.getElementById("siguienteObservacion").addEventListener("click", functi
     } else {
         // Al llegar a la observación 5, guardar automáticamente
         document.getElementById(`observacion${currentSelectedID}`).disabled = true;
+        document.getElementById("siguienteObservacion").disabled = true;
         alert("Muestra guardada automáticamente.");
 
         // Habilitar de nuevo el botón "Comenzar Muestreo"
@@ -126,13 +130,13 @@ document.getElementById("anteriorObservacion").addEventListener("click", functio
         if (currentSelectedID > 0) { 
             if (!(currentSelectedID == MaxRowCellID - 1))
             {
-                console.log("JOINED");
                 currentSelectedID++;
                 document.getElementById(`observacion${currentSelectedID}`).disabled = true;
                 currentSelectedID--;
             }
 
             document.getElementById(`observacion${currentSelectedID}`).disabled = false; // Enable the previous observation
+            document.getElementById("siguienteObservacion").disabled = false;
             console.log(currentSelectedID);
             currentSelectedID--;
         }
