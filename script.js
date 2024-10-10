@@ -15,7 +15,7 @@ let chart;
 document
     .getElementById("uploadForm")
     .addEventListener("submit", function (event) {
-        event.preventDefault(); // Evita que el formulario se envíe
+        event.preventDefault(); 
         const file = document.getElementById("inputArchivo").files[0];
         const formData = new FormData();
         formData.append("archivo", file);
@@ -26,7 +26,7 @@ document
         })
             .then((response) => response.text())
             .then((data) => {
-                console.log(data); // Aquí manejas la respuesta del servidor
+                console.log(data); 
             })
             .catch((error) => {
                 console.error("Error al subir el archivo:", error);
@@ -43,8 +43,8 @@ function mostrarDatosEnTabla(data) {
 
     tabla.innerHTML = "";
     tablaResultados.innerHTML = "";
-    muestras = []; // Reset the sample names
-    desviacionesEstandar = []; // Reset the standard deviation values
+    muestras = []; 
+    desviacionesEstandar = []; 
 
     data.forEach((fila, index) => {
         if (fila.length > 0) {
@@ -65,8 +65,6 @@ function mostrarDatosEnTabla(data) {
                     valoresNumericos,
                     promedio
                 );
-
-                // Add the sample name and standard deviation to the arrays
                 muestras.push(`Muestra ${index}`);
                 desviacionesEstandar.push(desviacionEstandar.toFixed(2));
 
@@ -80,17 +78,14 @@ function mostrarDatosEnTabla(data) {
         }
     });
 
-    // Update the chart with the new data
     actualizarGrafico();
 }
 
 document
     .getElementById("comenzarMuestreo")
     .addEventListener("click", function () {
-        // Deshabilitar el botón "Comenzar Muestreo"
         this.disabled = true;
 
-        // Crear una nueva fila para capturar las observaciones
         const tabla = document
             .getElementById("tablaDatos")
             .getElementsByTagName("tbody")[0];
@@ -98,10 +93,8 @@ document
             .getElementById("tablaResultados")
             .getElementsByTagName("tbody")[0];
 
-        // Contar las filas existentes para determinar el número de muestra
         const filasExistentes = tabla.rows.length;
 
-        // Incrementar el número de muestra basado en el número de filas
         numeroDeMuestra = filasExistentes;
 
         document.getElementById("siguienteObservacion").disabled = false;
@@ -113,11 +106,9 @@ document
             currentSelectedID++;
         }
 
-        // Insertar nueva fila al final de la tabla de observaciones
         filaActual = tabla.insertRow();
-        filaActual.insertCell().textContent = numeroDeMuestra; // Columna MUESTRA
+        filaActual.insertCell().textContent = numeroDeMuestra; 
 
-        // Insertar celdas para cada observación con inputs deshabilitados inicialmente
         for (let i = 1; i <= 5; MaxRowCellID++, i++) {
             const celda = filaActual.insertCell();
             celda.innerHTML = `<input type="text" disabled id="observacion${MaxRowCellID}">`;
@@ -130,9 +121,9 @@ document
 
         // Insertar una nueva fila en la tabla de resultados (promedio y desviación estándar)
         const nuevaFilaResultados = tablaResultados.insertRow();
-        nuevaFilaResultados.insertCell().textContent = `Muestra ${numeroDeMuestra}`; // Nombre de la muestra
-        nuevaFilaResultados.insertCell().textContent = "0"; // Promedio inicial
-        nuevaFilaResultados.insertCell().textContent = "0"; // Desviación estándar inicial
+        nuevaFilaResultados.insertCell().textContent = `Muestra ${numeroDeMuestra}`; 
+        nuevaFilaResultados.insertCell().textContent = "0"; 
+        nuevaFilaResultados.insertCell().textContent = "0"; 
 
         console.log(numeroDeMuestra);
     });
@@ -154,7 +145,7 @@ document
         }
 
         if (currentSelectedID < MaxRowCellID - 1) {
-            // Deshabilitar la observación actual y habilitar la siguiente
+            
             document.getElementById(
                 `observacion${currentSelectedID}`
             ).disabled = true;
@@ -164,14 +155,12 @@ document
             ).disabled = false;
             console.log(currentSelectedID);
         } else {
-            // Al llegar a la observación 5, guardar automáticamente
             document.getElementById(
                 `observacion${currentSelectedID}`
             ).disabled = true;
             document.getElementById("siguienteObservacion").disabled = true;
-            alert("Muestra guardada automáticamente.");
+            alert("Muestra preguarda");
 
-            // Obtener los valores de las observaciones de la fila actual
             const valoresObservaciones = [];
             for (let i = 1; i <= 5; i++) {
                 const observacion = document.getElementById(
@@ -182,14 +171,13 @@ document
                 }
             }
 
-            // Calcular el promedio y la desviación estándar
             const promedio = calcularPromedio(valoresObservaciones);
             const desviacionEstandar = calcularDesviacionEstandar(
                 valoresObservaciones,
                 promedio
             );
 
-            // Actualizar la fila correspondiente en la tabla de resultados
+
             const tablaResultados = document
                 .getElementById("tablaResultados")
                 .getElementsByTagName("tbody")[0];
@@ -236,7 +224,7 @@ document
 
                 document.getElementById(
                     `observacion${currentSelectedID}`
-                ).disabled = false; // Enable the previous observation
+                ).disabled = false; 
                 document.getElementById(
                     "siguienteObservacion"
                 ).disabled = false;
@@ -247,11 +235,11 @@ document
             if (currentSelectedID > 0) {
                 document.getElementById(
                     `observacion${currentSelectedID}`
-                ).disabled = true; // Disable current observation
+                ).disabled = true; 
                 currentSelectedID--;
                 document.getElementById(
                     `observacion${currentSelectedID}`
-                ).disabled = false; // Enable the previous observation
+                ).disabled = false; 
             } else {
                 console.log("LEAVE");
             }
@@ -271,7 +259,6 @@ function calcularDesviacionEstandar(valores, promedio) {
     return Math.sqrt(sumaDiferenciasCuadradas / valores.length);
 }
 
-// Function to update the chart with new data
 function actualizarGrafico() {
     const ctx = document
         .getElementById("graficoDesviacionEstandar")
@@ -305,3 +292,44 @@ function actualizarGrafico() {
         },
     });
 }
+
+
+document.getElementById("guardarMuestra").addEventListener("click", function () {
+    
+    const valoresObservaciones = [];
+    for (let i = 1; i <= 5; i++) {
+        const observacion = document.getElementById(
+            `observacion${MaxRowCellID - (6 - i)}`
+        ).value;
+        if (!isNaN(observacion) && observacion !== "") {
+            valoresObservaciones.push(parseFloat(observacion));
+        }
+    }
+
+    if (valoresObservaciones.length === 0) {
+        alert("No hay observaciones para guardar.");
+        return;
+    }
+
+    const dataToSave = {
+        muestra: numeroDeMuestra,
+        observaciones: valoresObservaciones,
+    };
+
+    fetch("http://localhost:3000/guardarMuestra", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSave),
+    })
+        .then((response) => response.text())
+        .then((data) => {
+            console.log(data); 
+            alert("Muestra guardada correctamente.");
+        })
+        .catch((error) => {
+            console.error("Error al guardar la muestra:", error);
+        });
+});
+

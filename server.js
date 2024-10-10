@@ -1,45 +1,105 @@
 const express = require('express');
-const multer = require('multer'); // For handling file uploads
-const path = require('path');
-const fs = require('fs'); // To handle file system operations
 const cors = require('cors');
-const app = express();
-const port = 3000;
+const multer = require('multer');
+const xlsx = require('xlsx');
+const fs = require('fs');
+const path = require('path');
 
+const app = express();
+const PORT = 3000;
+app.use(express.json());
 
 app.use(cors());
-// Configuration of multer to store files on disk
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadDir = 'uploads/';
-        // Create the directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir);
-        }
-        cb(null, uploadDir); // Save files to the "uploads" directory
-    },
-    filename: (req, file, cb) => {
-        // Save the file with the original filename
-        cb(null, file.originalname);
+
+const MAINFILE = "data/datos.xlsx";
+
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+app.post("/guardarMuestra", (req, res) => {
+    const { observaciones } = req.body;
+
+    const filePath = path.join(__dirname, MAINFILE);
+
+    let existingWorkbook;
+    if (fs.existsSync(filePath)) {
+        existingWorkbook = xlsx.readFile(filePath);
+    } else {
+        existingWorkbook = xlsx.utils.book_new();
     }
+
+    const sheetName = existingWorkbook.SheetNames[0] || 'Hoja1';
+    let existingSheet = existingWorkbook.Sheets[sheetName];
+
+    const existingData = existingSheet ? xlsx.utils.sheet_to_json(existingSheet) : [];
+
+  
+    const maxExistingSample = existingData.length ? Math.max(...existingData.map(row => row.Muestra)) : 0;
+
+    const newEntry = {
+        Muestra: maxExistingSample + 1, 
+        ...observaciones.reduce((acc, obs, index) => {
+            acc[`Observacion ${index + 1}`] = obs; 
+            return acc;
+        }, {})
+    };
+
+    const updatedData = [...existingData, newEntry];
+
+    const newSheet = xlsx.utils.json_to_sheet(updatedData);
+
+    if (!existingWorkbook.Sheets[sheetName]) {
+        xlsx.utils.book_append_sheet(existingWorkbook, newSheet, sheetName);
+    } else {
+        existingWorkbook.Sheets[sheetName] = newSheet; 
+    }
+
+    xlsx.writeFile(existingWorkbook, filePath);
+
+    res.send("Muestra guardada exitosamente en el archivo Excel.");
 });
 
-const upload = multer({ storage });
 
-// Middleware to serve static files like HTML, CSS, and JS
-app.use(express.static('public'));
 
-// Route to receive the Excel file and save it
 app.post('/upload', upload.single('archivo'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('No file was uploaded.');
+    const uploadedFile = req.file;
+
+    const existingFilePath = path.join(__dirname, MAINFILE);
+
+    if (!fs.existsSync(existingFilePath)) {
+        fs.writeFileSync(existingFilePath, uploadedFile.buffer);
+        return res.send('Archivo subido y creado con éxito.');
     }
 
-    // The file has been saved to the "uploads" folder
-    res.send('File uploaded and saved successfully.');
+    const existingWorkbook = xlsx.readFile(existingFilePath);
+    const newWorkbook = xlsx.read(uploadedFile.buffer);
+
+    const existingSheet = existingWorkbook.Sheets[existingWorkbook.SheetNames[0]];
+    const newSheet = newWorkbook.Sheets[newWorkbook.SheetNames[0]];
+
+    const existingData = xlsx.utils.sheet_to_json(existingSheet);
+    const newData = xlsx.utils.sheet_to_json(newSheet);
+
+    const maxExistingSample = existingData.length ? Math.max(...existingData.map(row => row.Muestra)) : 0;
+
+    const newDataAdjusted = newData.map((row, index) => ({
+        ...row,
+        Muestra: maxExistingSample + index + 1 
+    }));
+
+    const concatenatedData = existingData.concat(newDataAdjusted);
+
+    const newSheetMerged = xlsx.utils.json_to_sheet(concatenatedData);
+
+    const newWorkbookMerged = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(newWorkbookMerged, newSheetMerged, 'Hoja1');
+
+    xlsx.writeFile(newWorkbookMerged, existingFilePath);
+
+    res.send('Archivo subido y concatenado con éxito.');
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
