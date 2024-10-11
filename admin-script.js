@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 // Array para almacenar promedios y desviaciones estándar de cada muestra
                 const calculos = [];
+                const etiquetas = []; // Para almacenar las etiquetas (nombres de las muestras)
+                const _desviacionEstandar = []; // Para almacenar los promedios
 
                 // Iterar sobre los datos y crear filas de la tabla
                 data.forEach(row => {
@@ -50,8 +52,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     calculos.push({
                         muestra: row.Muestra,
                         promedio: promedio.toFixed(2), // Limitar a 2 decimales
-                        desviacionEstandar: desviacionEstandar.toFixed(2)
+                        desviacionEstandar: desviacionEstandar.toFixed(5) // Aquí ya no hay error
                     });
+
+                    // Agregar a etiquetas y promedios para la gráfica
+                    etiquetas.push(row.Muestra);
+                    _desviacionEstandar.push(desviacionEstandar.toFixed(2)); // Usar desviacionEstandar
                 });
 
                 // Insertar los cálculos en la tabla de resultados
@@ -64,7 +70,35 @@ document.addEventListener("DOMContentLoaded", function() {
                     `;
                     resultadosBody.appendChild(tr);
                 });
+
+                // Crear la gráfica
+                crearGrafica(etiquetas, _desviacionEstandar);
             })
             .catch(error => console.error('Error al obtener los datos:', error));
     });
+
+    function crearGrafica(etiquetas, _desviacionEstandar) {
+        const ctx = document.getElementById('miGrafica').getContext('2d');
+        
+        window.miGrafica = new Chart(ctx, {
+            type: 'line', // Cambia el tipo de gráfica si lo deseas
+            data: {
+                labels: etiquetas,
+                datasets: [{
+                    label: 'Desviacion Estandar',
+                    data: _desviacionEstandar,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
 });

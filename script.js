@@ -256,7 +256,8 @@ function calcularDesviacionEstandar(valores, promedio) {
         (acc, val) => acc + Math.pow(val - promedio, 2),
         0
     );
-    return Math.sqrt(sumaDiferenciasCuadradas / valores.length);
+    // Cambiar aquí para usar n - 1
+    return Math.sqrt(sumaDiferenciasCuadradas / (valores.length - 1));
 }
 
 function actualizarGrafico() {
