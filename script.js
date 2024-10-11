@@ -333,3 +333,15 @@ document.getElementById("guardarMuestra").addEventListener("click", function () 
         });
 });
 
+
+/* LOG IN */
+document.getElementById("loginButton").addEventListener("click", function() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if (username == 'admin' && password == '12345') {
+        window.location.href = "admin-index.html";
+    } else {
+        alert("El usuario no existe, intenta de nuevo.");
+    }
+});

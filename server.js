@@ -100,6 +100,25 @@ app.post('/upload', upload.single('archivo'), (req, res) => {
     res.send('Archivo subido y concatenado con éxito.');
 });
 
+app.get('/datos', (req, res) => {
+    const filePath = path.join(__dirname, MAINFILE);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'El archivo de datos no existe.' });
+    }
+
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+
+    // Convertir la hoja a un JSON para enviarla como respuesta
+    const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+    res.json(jsonData);
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
+
+
