@@ -8,32 +8,29 @@ let wasLoadedDocument = false;
 let firstRow = false;
 
 let filaActualResultados = null;
+let desviacionesEstandar = [];
+let muestras = [];
+let chart;
 
 document
-    .getElementById("inputArchivo")
-    .addEventListener("change", function (event) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
+    .getElementById("uploadForm")
+    .addEventListener("submit", function (event) {
+        event.preventDefault(); // Evita que el formulario se envíe
+        const file = document.getElementById("inputArchivo").files[0];
+        const formData = new FormData();
+        formData.append("archivo", file);
 
-        reader.onload = function (e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-
-            // Asumimos que los datos están en la primera hoja
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            // Convertimos los datos de la hoja a JSON
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
-                header: 1,
+        fetch("http://localhost:3000/upload", {
+            method: "POST",
+            body: formData,
+        })
+            .then((response) => response.text())
+            .then((data) => {
+                console.log(data); // Aquí manejas la respuesta del servidor
+            })
+            .catch((error) => {
+                console.error("Error al subir el archivo:", error);
             });
-
-            // Mostrar los datos en la tabla y actualizar número de muestra
-            mostrarDatosEnTabla(jsonData);
-            numeroDeMuestra = jsonData.length; // Actualizar la cantidad de muestras
-            wasLoadedDocument = true;
-        };
-
-        reader.readAsArrayBuffer(file);
     });
 
 function mostrarDatosEnTabla(data) {
@@ -274,30 +271,26 @@ function calcularDesviacionEstandar(valores, promedio) {
     return Math.sqrt(sumaDiferenciasCuadradas / valores.length);
 }
 
-let desviacionesEstandar = []; // Array to store standard deviation values
-let muestras = []; // Array to store the sample names
-let chart;
-
 // Function to update the chart with new data
 function actualizarGrafico() {
     const ctx = document
         .getElementById("graficoDesviacionEstandar")
         .getContext("2d");
-        
+
     if (chart) {
         chart.destroy();
     }
 
     chart = new Chart(ctx, {
-        type: "line", // You can use 'bar' or 'line' depending on how you want the graph to look
+        type: "line",
         data: {
-            labels: muestras, // Labels for each sample
+            labels: muestras,
             datasets: [
                 {
                     label: "Desviación Estándar",
-                    data: desviacionesEstandar, // Data points for standard deviation
-                    backgroundColor: "rgba(75, 192, 192, 0.2)", // Background color
-                    borderColor: "rgba(75, 192, 192, 1)", // Line color
+                    data: desviacionesEstandar,
+                    backgroundColor: "rgba(75, 192, 192, 0.2)",
+                    borderColor: "rgba(75, 192, 192, 1)",
                     borderWidth: 1,
                     fill: false,
                 },

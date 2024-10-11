@@ -5,9 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QCAlert</title>
-    <!-- Incluir la librería SheetJS para leer archivos Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Incluir el archivo JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="script.js" defer></script>
@@ -16,7 +14,10 @@
 <body>
 
     <!-- Input para subir el archivo -->
-    <input type="file" id="inputArchivo" accept=".xlsx">
+    <form id="uploadForm">
+        <input type="file" id="inputArchivo" accept=".xlsx">
+        <button type="submit">Subir Archivo</button>
+    </form>
     <button id="comenzarMuestreo">Comenzar muestreo</button>
     <button id="siguienteObservacion" disabled>Siguiente observación</button>
     <button id="anteriorObservacion" disabled>Anterior observación</button>
@@ -30,12 +31,12 @@
     <table id="tablaDatos" border="1">
         <thead>
             <tr>
-                <th>Muestra</th>
-                <th>Observación 1</th>
-                <th>Observación 2</th>
-                <th>Observación 3</th>
-                <th>Observación 4</th>
-                <th>Observación 5</th>
+                <th>Día de observación</th>
+                <th>Muestra 1</th>
+                <th>Muestra 2</th>
+                <th>Muestra 3</th>
+                <th>Muestra 4</th>
+                <th>Muestra 5</th>
             </tr>
         </thead>
         <tbody>
