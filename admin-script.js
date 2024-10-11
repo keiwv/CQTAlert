@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("loadDataBtn").addEventListener("click", function() {
+    // Función para cargar datos
+    function cargarDatos() {
         fetch('http://localhost:3000/datos') // Cambia la URL si es necesario
             .then(response => response.json())
             .then(data => {
@@ -75,11 +76,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 crearGrafica(etiquetas, _desviacionEstandar);
             })
             .catch(error => console.error('Error al obtener los datos:', error));
-    });
+    }
+
+    // Cargar datos al abrir la página
+    cargarDatos();
+
+    // Cargar datos al hacer clic en el botón
+    document.getElementById("loadDataBtn").addEventListener("click", cargarDatos);
 
     function crearGrafica(etiquetas, _desviacionEstandar) {
         const ctx = document.getElementById('miGrafica').getContext('2d');
-        
+
         window.miGrafica = new Chart(ctx, {
             type: 'line', // Cambia el tipo de gráfica si lo deseas
             data: {
