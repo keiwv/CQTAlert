@@ -1,26 +1,29 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // Función para cargar datos
-    function cargarDatos() {
-        fetch('http://localhost:3000/datos') // Cambia la URL si es necesario
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.querySelector("#tablaDatos tbody");
-                const resultadosBody = document.querySelector("#tablaResultadosBody");
+let UCL = 0.051;
+let UC = 0.0244;
+let LCL = 0;
 
-                // Limpiar el contenido anterior de la tabla
+document.addEventListener("DOMContentLoaded", function () {
+    function cargarDatos() {
+        fetch("http://localhost:3000/datos")
+            .then((response) => response.json())
+            .then((data) => {
+                const tbody = document.querySelector("#tablaDatos tbody");
+                const resultadosBody = document.querySelector(
+                    "#tablaResultadosBody"
+                );
+
                 tbody.innerHTML = "";
                 resultadosBody.innerHTML = "";
 
-                // Array para almacenar promedios y desviaciones estándar de cada muestra
                 const calculos = [];
-                const etiquetas = []; // Para almacenar las etiquetas (nombres de las muestras)
-                const _desviacionEstandar = []; // Para almacenar los promedios
+                const etiquetas = []; 
+                const _desviacionEstandar = []; 
 
-                // Iterar sobre los datos y crear filas de la tabla
-                data.forEach(row => {
+                // Iterate over the data and create table rows
+                data.forEach((row) => {
                     const tr = document.createElement("tr");
 
-                    // Asumiendo que `Muestra 1`, `Muestra 2`, ... están en row
+                    // Assuming sample names are in `row.Muestra`
                     tr.innerHTML = `
                         <td>${row.Muestra}</td>
                         <td>${row["Observacion 1"] || ""}</td>
@@ -31,38 +34,41 @@ document.addEventListener("DOMContentLoaded", function() {
                     `;
 
                     tbody.appendChild(tr);
-
-                    // Extraer las observaciones como un array de números
+        
                     const observaciones = [
                         parseFloat(row["Observacion 1"]) || 0,
                         parseFloat(row["Observacion 2"]) || 0,
                         parseFloat(row["Observacion 3"]) || 0,
                         parseFloat(row["Observacion 4"]) || 0,
-                        parseFloat(row["Observacion 5"]) || 0
+                        parseFloat(row["Observacion 5"]) || 0,
                     ];
 
-                    // Cálculo del promedio
-                    const promedio = observaciones.reduce((sum, value) => sum + value, 0) / observaciones.length;
+                    const promedio =
+                        observaciones.reduce((sum, value) => sum + value, 0) /
+                        observaciones.length;
 
-                    // Cálculo de la desviación estándar muestral
+                    // Calculate sample standard deviation
                     const desviacionEstandar = Math.sqrt(
-                        observaciones.reduce((sum, value) => sum + Math.pow(value - promedio, 2), 0) / (observaciones.length - 1)
+                        observaciones.reduce(
+                            (sum, value) => sum + Math.pow(value - promedio, 2),
+                            0
+                        ) /
+                            (observaciones.length - 1)
                     );
 
-                    // Almacenar el cálculo en el array
                     calculos.push({
                         muestra: row.Muestra,
-                        promedio: promedio.toFixed(2), // Limitar a 2 decimales
-                        desviacionEstandar: desviacionEstandar.toFixed(5) // Aquí ya no hay error
+                        promedio: promedio.toFixed(2),
+                        desviacionEstandar: desviacionEstandar.toFixed(10),
                     });
 
-                    // Agregar a etiquetas y promedios para la gráfica
+                    // Add to labels and standard deviations for the chart
                     etiquetas.push(row.Muestra);
-                    _desviacionEstandar.push(desviacionEstandar.toFixed(2)); // Usar desviacionEstandar
+                    _desviacionEstandar.push(desviacionEstandar.toFixed(10)); 
                 });
 
-                // Insertar los cálculos en la tabla de resultados
-                calculos.forEach(calc => {
+                // Insert calculations into the results table
+                calculos.forEach((calc) => {
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
                         <td>${calc.muestra}</td>
@@ -72,40 +78,89 @@ document.addEventListener("DOMContentLoaded", function() {
                     resultadosBody.appendChild(tr);
                 });
 
-                // Crear la gráfica
+                // Create the chart
                 crearGrafica(etiquetas, _desviacionEstandar);
             })
-            .catch(error => console.error('Error al obtener los datos:', error));
+            .catch((error) =>
+                console.error("Error al obtener los datos:", error)
+            );
     }
 
-    // Cargar datos al abrir la página
+    // Load data when the page opens
     cargarDatos();
 
-    // Cargar datos al hacer clic en el botón
-    document.getElementById("loadDataBtn").addEventListener("click", cargarDatos);
-
     function crearGrafica(etiquetas, _desviacionEstandar) {
-        const ctx = document.getElementById('miGrafica').getContext('2d');
+        const ctx = document.getElementById("miGrafica").getContext("2d");
 
         window.miGrafica = new Chart(ctx, {
-            type: 'line', // Cambia el tipo de gráfica si lo deseas
+            type: "line",
             data: {
                 labels: etiquetas,
-                datasets: [{
-                    label: 'Desviacion Estandar',
-                    data: _desviacionEstandar,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
+                datasets: [
+                    {
+                        label: "Desviación Estándar",
+                        data: _desviacionEstandar.map((num) => parseFloat(num)),
+                        backgroundColor: "rgba(75, 192, 192, 0.2)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1,
+                    },
+                ],
             },
             options: {
                 scales: {
                     y: {
-                        beginAtZero: true
-                    }
-                }
-            }
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Desviación Estándar",
+                        },
+                        min: 0, // Set minimum value for Y axis
+                        max: Math.max(UCL, UC) + 0.001, // Set maximum value based on UCL and UC
+                    },
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            lcl: {
+                                type: "line",
+                                yMin: LCL,
+                                yMax: LCL,
+                                borderColor: "red",
+                                borderWidth: 2,
+                                label: {
+                                    enabled: true,
+                                    content: "LCL",
+                                    position: "end",
+                                },
+                            },
+                            ucl: {
+                                type: "line",
+                                yMin: UCL,
+                                yMax: UCL,
+                                borderColor: "blue",
+                                borderWidth: 2,
+                                label: {
+                                    enabled: true,
+                                    content: "UCL",
+                                    position: "end",
+                                },
+                            },
+                            uc: {
+                                type: "line",
+                                yMin: UC,
+                                yMax: UC,
+                                borderColor: "gray",
+                                borderWidth: 2,
+                                label: {
+                                    enabled: true,
+                                    content: "UC",
+                                    position: "end",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
         });
     }
 });

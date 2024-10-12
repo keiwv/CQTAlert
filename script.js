@@ -12,6 +12,7 @@ let desviacionesEstandar = [];
 let muestras = [];
 let chart;
 
+
 document
     .getElementById("uploadForm")
     .addEventListener("submit", function (event) {
