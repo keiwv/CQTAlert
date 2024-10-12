@@ -2,6 +2,20 @@ let UCL = 0.051;
 let UC = 0.0244;
 let LCL = 0;
 
+/* VERIFY LOGIN */
+
+if (!localStorage.getItem('loggedIn'))
+{
+    alert("Inicia sesión primero:)");
+    window.location.href = 'index.html';
+}
+
+document.getElementById('logoutButton').addEventListener('click', function() {
+    localStorage.removeItem('loggedIn'); // Elimina el estado de inicio de sesión
+    window.location.href = 'index.html'; // Redirige al inicio de sesión
+});
+
+
 document.addEventListener("DOMContentLoaded", function () {
     function cargarDatos() {
         fetch("http://localhost:3000/datos")

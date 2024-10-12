@@ -342,6 +342,7 @@ document.getElementById("loginButton").addEventListener("click", function() {
     const password = document.getElementById("password").value;
 
     if (username == 'admin' && password == '12345') {
+        localStorage.setItem('loggedIn', 'true');
         window.location.href = "admin-index.html";
     } else {
         alert("El usuario no existe, intenta de nuevo.");
