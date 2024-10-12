@@ -11,8 +11,8 @@ if (!localStorage.getItem('loggedIn'))
 }
 
 document.getElementById('logoutButton').addEventListener('click', function() {
-    localStorage.removeItem('loggedIn'); // Elimina el estado de inicio de sesión
-    window.location.href = 'index.html'; // Redirige al inicio de sesión
+    localStorage.removeItem('loggedIn'); 
+    window.location.href = 'index.html'; 
 });
 
 
@@ -128,8 +128,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             display: true,
                             text: "Desviación Estándar",
                         },
-                        min: 0, // Set minimum value for Y axis
-                        max: Math.max(UCL, UC) + 0.001, // Set maximum value based on UCL and UC
+                        min: 0, 
+                        max: Math.max(UCL, UC) + 0.001, 
                     },
                 },
                 plugins: {
@@ -177,4 +177,23 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         });
     }
+});
+
+
+document.getElementById('deleteFile').addEventListener('click', function() {
+    fetch('http://localhost:3000/data', {
+        method: 'DELETE'
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.log("Eliminado exitosamente");
+        } else {
+            response.json().then(data => {
+                console.log("El archivo no existe o hay un problema con el servidor.");
+            });
+        }
+    })
+    .catch(error => {
+        alert('Error de red: ' + error);
+    });
 });

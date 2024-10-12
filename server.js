@@ -60,7 +60,21 @@ app.post("/guardarMuestra", (req, res) => {
     res.send("Muestra guardada exitosamente en el archivo Excel.");
 });
 
+app.delete('/data', (req, res) => {
+    const filePath = path.join(__dirname, MAINFILE);
 
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'El archivo no existe.' });
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error al eliminar el archivo.' });
+        }
+        res.send('Archivo eliminado exitosamente.');
+    });
+});
 
 app.post('/upload', upload.single('archivo'), (req, res) => {
     const uploadedFile = req.file;
