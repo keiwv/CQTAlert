@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             text: "Desviación Estándar",
                         },
                         min: 0, 
-                        max: Math.max(UCL, UC) + 0.001, 
+                        max: Math.max(UCL, UC) + 0.1, 
                     },
                 },
                 plugins: {
