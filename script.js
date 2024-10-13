@@ -12,12 +12,23 @@ let desviacionesEstandar = [];
 let muestras = [];
 let chart;
 
+document.getElementById("siguienteObservacion").disabled = true;
+document.getElementById("anteriorObservacion").disabled = true;
+document.getElementById("guardarMuestra").disabled = true;
+document.getElementById("_submit").disabled = true;
 
-document
-    .getElementById("uploadForm")
-    .addEventListener("submit", function (event) {
-        event.preventDefault(); 
-        const file = document.getElementById("inputArchivo").files[0];
+const inputArchivo = document.getElementById("inputArchivo");
+
+inputArchivo.addEventListener("change", function () {
+    const file = inputArchivo.files[0];
+    document.getElementById("_submit").disabled = !file;
+});
+
+document.getElementById("uploadForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const file = inputArchivo.files[0];
+
+    if (file != null) {
         const formData = new FormData();
         formData.append("archivo", file);
 
@@ -27,12 +38,15 @@ document
         })
             .then((response) => response.text())
             .then((data) => {
-                console.log(data); 
+                console.log(data);
             })
             .catch((error) => {
                 console.error("Error al subir el archivo:", error);
             });
-    });
+    } else {
+        document.getElementById("_submit").disabled = true;
+    }
+});
 
 function mostrarDatosEnTabla(data) {
     const tabla = document
@@ -44,8 +58,8 @@ function mostrarDatosEnTabla(data) {
 
     tabla.innerHTML = "";
     tablaResultados.innerHTML = "";
-    muestras = []; 
-    desviacionesEstandar = []; 
+    muestras = [];
+    desviacionesEstandar = [];
 
     data.forEach((fila, index) => {
         if (fila.length > 0) {
@@ -108,7 +122,7 @@ document
         }
 
         filaActual = tabla.insertRow();
-        filaActual.insertCell().textContent = numeroDeMuestra; 
+        filaActual.insertCell().textContent = numeroDeMuestra;
 
         for (let i = 1; i <= 5; MaxRowCellID++, i++) {
             const celda = filaActual.insertCell();
@@ -122,9 +136,9 @@ document
 
         // Insertar una nueva fila en la tabla de resultados (promedio y desviación estándar)
         const nuevaFilaResultados = tablaResultados.insertRow();
-        nuevaFilaResultados.insertCell().textContent = `Muestra ${numeroDeMuestra}`; 
-        nuevaFilaResultados.insertCell().textContent = "0"; 
-        nuevaFilaResultados.insertCell().textContent = "0"; 
+        nuevaFilaResultados.insertCell().textContent = `Muestra ${numeroDeMuestra}`;
+        nuevaFilaResultados.insertCell().textContent = "0";
+        nuevaFilaResultados.insertCell().textContent = "0";
 
         console.log(numeroDeMuestra);
     });
@@ -136,7 +150,7 @@ document
             `observacion${currentSelectedID}`
         ).value;
 
-        if (isNaN(value)) {
+        if (isNaN(value) || value == "") {
             alert("Elige un valor válido");
             return;
         }
@@ -146,7 +160,6 @@ document
         }
 
         if (currentSelectedID < MaxRowCellID - 1) {
-            
             document.getElementById(
                 `observacion${currentSelectedID}`
             ).disabled = true;
@@ -160,7 +173,9 @@ document
                 `observacion${currentSelectedID}`
             ).disabled = true;
             document.getElementById("siguienteObservacion").disabled = true;
-            alert("Muestra preguarda");
+            document.getElementById("anteriorObservacion").disabled = true;
+            document.getElementById("guardarMuestra").disabled = false;
+            alert("Muestra preguardada");
 
             const valoresObservaciones = [];
             for (let i = 1; i <= 5; i++) {
@@ -177,7 +192,6 @@ document
                 valoresObservaciones,
                 promedio
             );
-
 
             const tablaResultados = document
                 .getElementById("tablaResultados")
@@ -208,7 +222,9 @@ document
     });
 
 document
-    .getElementById("anteriorObservacion")
+    .getElementById(
+        "http://127.0.0.1:5500/index.htmlhttp://127.0.0.1:5500/index.htmlervacion"
+    )
     .addEventListener("click", function () {
         if (filaActual == null) {
             console.log("JOINED 1");
@@ -225,7 +241,7 @@ document
 
                 document.getElementById(
                     `observacion${currentSelectedID}`
-                ).disabled = false; 
+                ).disabled = false;
                 document.getElementById(
                     "siguienteObservacion"
                 ).disabled = false;
@@ -236,11 +252,11 @@ document
             if (currentSelectedID > 0) {
                 document.getElementById(
                     `observacion${currentSelectedID}`
-                ).disabled = true; 
+                ).disabled = true;
                 currentSelectedID--;
                 document.getElementById(
                     `observacion${currentSelectedID}`
-                ).disabled = false; 
+                ).disabled = false;
             } else {
                 console.log("LEAVE");
             }
@@ -295,54 +311,53 @@ function actualizarGrafico() {
     });
 }
 
-
-document.getElementById("guardarMuestra").addEventListener("click", function () {
-    
-    const valoresObservaciones = [];
-    for (let i = 1; i <= 5; i++) {
-        const observacion = document.getElementById(
-            `observacion${MaxRowCellID - (6 - i)}`
-        ).value;
-        if (!isNaN(observacion) && observacion !== "") {
-            valoresObservaciones.push(parseFloat(observacion));
+document
+    .getElementById("guardarMuestra")
+    .addEventListener("click", function () {
+        const valoresObservaciones = [];
+        for (let i = 1; i <= 5; i++) {
+            const observacion = document.getElementById(
+                `observacion${MaxRowCellID - (6 - i)}`
+            ).value;
+            if (!isNaN(observacion) && observacion !== "") {
+                valoresObservaciones.push(parseFloat(observacion));
+            }
         }
-    }
 
-    if (valoresObservaciones.length === 0) {
-        alert("No hay observaciones para guardar.");
-        return;
-    }
+        if (valoresObservaciones.length === 0) {
+            alert("No hay observaciones para guardar.");
+            return;
+        }
 
-    const dataToSave = {
-        muestra: numeroDeMuestra,
-        observaciones: valoresObservaciones,
-    };
+        const dataToSave = {
+            muestra: numeroDeMuestra,
+            observaciones: valoresObservaciones,
+        };
 
-    fetch("http://localhost:3000/guardarMuestra", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSave),
-    })
-        .then((response) => response.text())
-        .then((data) => {
-            console.log(data); 
-            alert("Muestra guardada correctamente.");
+        fetch("http://localhost:3000/guardarMuestra", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dataToSave),
         })
-        .catch((error) => {
-            console.error("Error al guardar la muestra:", error);
-        });
-});
-
+            .then((response) => response.text())
+            .then((data) => {
+                console.log(data);
+                alert("Muestra guardada correctamente.");
+            })
+            .catch((error) => {
+                console.error("Error al guardar la muestra:", error);
+            });
+    });
 
 /* LOG IN */
-document.getElementById("loginButton").addEventListener("click", function() {
+document.getElementById("loginButton").addEventListener("click", function () {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    if (username == 'admin' && password == '12345') {
-        localStorage.setItem('loggedIn', 'true');
+    if (username == "admin" && password == "12345") {
+        localStorage.setItem("loggedIn", "true");
         window.location.href = "admin-index.html";
     } else {
         alert("El usuario no existe, intenta de nuevo.");
