@@ -18,7 +18,7 @@ document.getElementById('logoutButton').addEventListener('click', function() {
 
 document.addEventListener("DOMContentLoaded", function () {
     function cargarDatos() {
-        fetch("http://localhost:3000/datos")
+        fetch("datos")
             .then((response) => response.json())
             .then((data) => {
                 const tbody = document.querySelector("#tablaDatos tbody");
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 document.getElementById('deleteFile').addEventListener('click', function() {
-    fetch('http://localhost:3000/data', {
+    fetch('data', {
         method: 'DELETE'
     })
     .then(response => {

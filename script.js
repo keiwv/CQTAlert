@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function()
             const formData = new FormData();
             formData.append("archivo", file);
     
-            fetch("http://localhost:3000/upload", {
+            fetch("upload", {
                 method: "POST",
                 body: formData,
             })
@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function()
                 observaciones: valoresObservaciones,
             };
     
-            fetch("http://localhost:3000/guardarMuestra", {
+            fetch("guardarMuestra", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
