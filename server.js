@@ -4,11 +4,11 @@ const multer = require("multer");
 const xlsx = require("xlsx");
 const fs = require("fs");
 const path = require("path");
+require('dotenv').config();
 
 const accountSid = process.env.ACCOUNTID;
 const authToken = process.env.AUTHTOKEN;
 const client = require("twilio")(accountSid, authToken);
-require('dotenv').config();
 
 const app = express();
 const PORT = 3000;
@@ -93,8 +93,15 @@ app.post("/guardarMuestra", (req, res) => {
                 from: process.env.TWILIO_FROM,
                 to: process.env.TWILIO_TO,
             })
-            .then((message) => console.log(message.sid))
-            .done();
+            .then((message) => console.log(message.sid));
+        
+        client.messages
+            .create({
+                body: `La muestra añadida en la línea ${maxExistingSample + 1} ha sobrepasado el UCL`,
+                from: process.env.TWILIO_FROM,
+                to: process.env.TWILIO_TOS,
+            })
+            .then((message) => console.log(message.sid));
     }
     
     if (desviacionMuestral < LCL) {
@@ -104,8 +111,15 @@ app.post("/guardarMuestra", (req, res) => {
                 from: process.env.TWILIO_FROM,
                 to: process.env.TWILIO_TO,
             })
-            .then((message) => console.log(message.sid))
-            .done();
+            .then((message) => console.log(message.sid));
+        
+        client.messages
+            .create({
+                body: `La muestra añadida en la línea ${maxExistingSample + 1} es menor que el LCL`,
+                from: process.env.TWILIO_FROM,
+                to: process.env.TWILIO_TOS,
+            })
+            .then((message) => console.log(message.sid));
     }
 
     res.json({
